@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ResourceList from "../../../components/resourceList/resourceList";
+import ResourceList from "@/components/resourceList/resourceList";
 import { useParams } from "next/navigation";
 
 export default function ResourceListPage() {
