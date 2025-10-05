@@ -23,7 +23,7 @@ export default function Profile() {
     };
 
     return (
-        <Box sx={{ p: 4, minHeight: "100vh", backgroundColor: "#f5f5f5"}}>
+        <Box >
             <Paper sx={{ maxWidth: 600, margin: "0 auto", p: 4, borderRadius: 3 }} elevation={3}>
                 {/* Header */}
                 <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>

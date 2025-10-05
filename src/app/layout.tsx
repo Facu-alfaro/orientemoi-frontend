@@ -1,6 +1,12 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+// 👇 ESTE es el que soluciona el SSR de Emotion sin crear cache a mano
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+// (Opcional) tu ThemeProviderClient si lo usás
+import ThemeProviderClient from "./ThemeRegistry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,15 +25,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* ✔️ Esto resuelve el hydration mismatch de MUI/Emotion sin config extra */}
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          {/* Si tenés tu tema propio, dejalo acá adentro */}
+          <ThemeProviderClient>
+            {children}
+          </ThemeProviderClient>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

@@ -1,6 +1,8 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Box, Grid, Typography, Button, Tooltip, Fab, Card, CardContent, CardActions } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 const initialResourceTypes = [
     {
@@ -25,8 +27,7 @@ const initialResourceTypes = [
 
 export default function ResourceTypeList() {
     const [resourceTypes, setResourceTypes] = useState(initialResourceTypes);
-
-    //  Function to add a new type (popup or modal can be added later)
+    const router = useRouter();
     const handleAddResourceType = () => {
         const newId = resourceTypes.length + 1;
         const newType = {
@@ -38,41 +39,85 @@ export default function ResourceTypeList() {
     };
 
     return (
-        <main className="min-h-screen bg-white flex flex-col items-center p-8 relative">
-            <h1 className="text-4xl font-extrabold mb-12 text-gray-800">
-                Types de Ressources
-            </h1>
-            <ul className="grid gap-8 w-full max-w-4xl">
-                {resourceTypes.map((type) => (
-                    <li
-                        key={type.id}
-                        className="border rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow duration-300 bg-gray-50 flex flex-col justify-between"
-                    >
-                        <div>
-                            <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                                {type.name}
-                            </h2>
-                            <p className="text-gray-600">{type.description}</p>
-                        </div>
-                        {/* This link will redirect me to the list of resources of a specific type */}
-                        <Link
-                            href={`/resourceList/${type.name.toLowerCase()}`}
-                            className="mt-6 inline-block text-center bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
-                        >
-                            Voir les ressources
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-
-            {/* Add Button */}
-            <button
-                onClick={handleAddResourceType}
-                className="fixed bottom-8 right-8 bg-blue-500 text-white w-16 h-16 rounded-full text-3xl font-bold shadow-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
-                title="Ajouter un nouveau type de ressource"
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                p: 4,
+            }}
+        >
+            <Typography
+                variant="h3"
+                fontWeight="bold"
+                sx={{ mb: 6, color: "text.primary", textAlign: "center" }}
             >
-                +
-            </button>
-        </main>
+                Types de Ressources
+            </Typography>
+
+            <Grid container spacing={4} sx={{ width: "100%", maxWidth: "lg" }}>
+                {resourceTypes.map((type) => (
+                    <Grid item key={type.id} xs={12} sm={6} md={4}>
+                        <Card
+                            sx={{
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                transition: "all 0.3s ease",
+                                bgcolor: "background.paper",
+                                "&:hover": {
+                                    boxShadow: 6,
+                                    transform: "translateY(-3px)",
+                                },
+                            }}
+                        >
+                            <CardContent>
+                                <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                    {type.name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {type.description}
+                                </Typography>
+                            </CardContent>
+
+                            <CardActions>
+                                <Button
+                                    variant="contained"
+                                    fullWidth
+                                    sx={{
+                                        fontWeight: 600,
+                                        bgcolor: "primary.main",
+                                        "&:hover": { bgcolor: "primary.dark" },
+                                    }}
+                                    onClick={() => router.push(`/pages/resourceList/${type.name.toLowerCase()}`)}
+                                >
+                                    Voir les ressources
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+
+            <Tooltip title="Ajouter un nouveau type de ressource" arrow>
+                <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={handleAddResourceType}
+                    sx={{
+                        position: "fixed",
+                        bottom: 24,
+                        right: 24,
+                        boxShadow: 4,
+                        "&:hover": { boxShadow: 6 },
+                    }}
+                >
+                    <AddIcon fontSize="large" />
+                </Fab>
+            </Tooltip>
+        </Box>
     );
 }

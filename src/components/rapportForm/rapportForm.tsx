@@ -14,7 +14,7 @@ export default function RapportForm() {
         setSelected(selected.includes(r) ? selected.filter((s) => s !== r) : [...selected, r]);
 
     return (
-        <Box sx={{ p: 4, minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
+        <Box>
             <Paper sx={{ maxWidth: 700, margin: "0 auto", p: 4, borderRadius: 3 }} elevation={3}>
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
                     Créer un Rapport
