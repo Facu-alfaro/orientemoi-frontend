@@ -1,7 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import EditIcon from '@mui/icons-material/Edit';
+import React, { useState } from "react";
+import {
+    Box,
+    Card,
+    CardContent,
+    CardActions,
+    Typography,
+    Button,
+    IconButton, Fab, Tooltip,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 interface ResourceListProps {
     type: string;
@@ -32,7 +42,6 @@ const initialResources: Resource[] = [
 export default function ResourceList({ type }: ResourceListProps) {
     const [resources, setResources] = useState(initialResources);
 
-    // Function to add a new resource
     const handleAddResource = () => {
         const newId = resources.length + 1;
         const newResource: Resource = {
@@ -44,7 +53,6 @@ export default function ResourceList({ type }: ResourceListProps) {
         setResources([...resources, newResource]);
     };
 
-    // Function to edit a resource
     const handleEditResource = (id: number) => {
         const newName = prompt("Modifier le nom de la ressource :");
         if (newName) {
@@ -55,51 +63,76 @@ export default function ResourceList({ type }: ResourceListProps) {
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 p-8 relative">   {/*min-h-screen is to get the full screen and not only the half*/}
-            <h1 className="text-4xl font-extrabold mb-10 text-gray-800">
+        <Box sx={{ minHeight: "100vh", bgcolor: "#f5f5f5", p: 4, position: "relative" }}>
+            <Typography variant="h4" fontWeight="bold" mb={4} color="text.primary" >
                 Ressources pour {type}
-            </h1>
+            </Typography>
 
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "1fr 1fr",
+                        md: "1fr 1fr 1fr",
+                    },
+                    gap: 3,
+                }}
+            >
                 {resources.map((resource) => (
-                    <div
+                    <Card
                         key={resource.id}
-                        className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between relative"  //relative to have edit icon (absolute) in different resources
+                        sx={{ position: "relative", borderRadius: 3, boxShadow: 3 }}
                     >
-                        {/* Edit Button */}
-                        <button
+                        <IconButton
                             onClick={() => handleEditResource(resource.id)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors"
+                            sx={{ position: "absolute", top: 8, right: 8 }}
                             title="Modifier la ressource"
                         >
-                            <EditIcon/>
-                        </button>
-                        <div>
-                            <h2 className="text-2xl font-bold mb-3 text-gray-800">
-                                {resource.name}
-                            </h2>
-                            <p className="text-gray-600 mb-4">{resource.description}</p>
-                        </div>
-                        <a
-                            href={resource.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-auto inline-block text-center bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
-                        >
-                            Visiter le site
-                        </a>
-                    </div>
-                ))}
-            </div>
+                            <EditIcon />
+                        </IconButton>
 
-            {/* Add Button */}
-            <button
-                onClick={handleAddResource}
-                className="fixed bottom-8 right-8 bg-blue-500 text-white w-16 h-16 rounded-full text-3xl font-bold shadow-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
-                title="Ajouter une nouvelle ressource"
-            >
-                +
-            </button>
-        </main>
+                        <CardContent>
+                            <Typography variant="h6" fontWeight="bold" gutterBottom>
+                                {resource.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {resource.description}
+                            </Typography>
+                        </CardContent>
+
+                        <CardActions>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                color="primary"
+                                href={resource.website}
+                                target="_blank"
+                                fullWidth
+                            >
+                                Visiter le site
+                            </Button>
+                        </CardActions>
+                    </Card>
+                ))}
+            </Box>
+
+            <Tooltip title="Ajouter un nouveau type de ressource" arrow>
+                <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={handleAddResource}
+                    sx={{
+                        position: "fixed",
+                        bottom: 24,
+                        right: 24,
+                        boxShadow: 4,
+                        "&:hover": { boxShadow: 6 },
+                    }}
+                >
+                    <AddIcon fontSize="large" />
+                </Fab>
+            </Tooltip>
+        </Box>
     );
 }

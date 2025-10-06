@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 
 export default function Navbar() {
+    const router = useRouter();
     return (
         <AppBar>
             <Toolbar>
@@ -14,18 +15,18 @@ export default function Navbar() {
 
                 {/* Navigation links */}
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button color="inherit" component={Link} href="/resourceTypeList">
+                    <Button color="inherit" onClick={() => router.push(`/pages/resourceTypeList`)}>
                         Types de Ressources
                     </Button>
-                    <Button color="inherit" component={Link} href="/rapportForm">
+                    <Button color="inherit" onClick={() => router.push(`/pages/rapportForm`)}>
                         Créer un rapport
                     </Button>
                 </Box>
 
                 {/* Profile completely at the right */}
                 <Box sx={{ marginLeft: 'auto' }}>
-                    <Button color="inherit" component={Link} href="/profile">
-                        Profil
+                    <Button color="inherit" onClick={() => router.push(`/pages/profile`)}>
+                        Profile
                     </Button>
                 </Box>
             </Toolbar>
