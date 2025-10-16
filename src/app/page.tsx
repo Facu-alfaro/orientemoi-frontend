@@ -1,6 +1,6 @@
-import Login from "./pages/login/page"
+import SignIn from "@/app/pages/signin/page"
 export default function Home() {
   return (
-      <Login/>
+      <SignIn/>
   );
 }

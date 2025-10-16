@@ -11,11 +11,16 @@ import {
     InputAdornment,
     IconButton,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Login as LoginIcon } from "@mui/icons-material";
+import { Visibility, VisibilityOff, PersonAdd as SignUpIcon } from "@mui/icons-material";
 
-export default function LoginPage() {
+export default function SignUpPage() {
     const [showPassword, setShowPassword] = useState(false);
-    const [form, setForm] = useState({ email: "", password: "" });
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,8 +28,8 @@ export default function LoginPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Login:", form);
-
+        // Add your signup logic here
+        console.log("Sign Up:", form);
     };
 
     return (
@@ -34,8 +39,7 @@ export default function LoginPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background:
-                    "linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #90caf9 100%)",
+                background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #90caf9 100%)",
                 p: 2,
             }}
         >
@@ -52,13 +56,24 @@ export default function LoginPage() {
                 }}
             >
                 <Typography variant="h4" fontWeight="bold" gutterBottom color="primary">
-                    Bienvenue
+                    Créer un compte
                 </Typography>
                 <Typography variant="body1" color="text.secondary" mb={4}>
-                    Connecte-toi à ton compte pour continuer
+                    Remplis le formulaire pour créer ton compte
                 </Typography>
 
                 <form onSubmit={handleSubmit}>
+                    <TextField
+                        label="Nom complet"
+                        variant="outlined"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                        sx={{ mb: 3 }}
+                    />
+
                     <TextField
                         label="Adresse courriel"
                         variant="outlined"
@@ -94,13 +109,25 @@ export default function LoginPage() {
                         }}
                     />
 
+                    <TextField
+                        label="Confirmer le mot de passe"
+                        variant="outlined"
+                        name="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                        sx={{ mb: 3 }}
+                    />
+
                     <Button
                         type="submit"
                         variant="contained"
                         color="primary"
                         fullWidth
                         size="large"
-                        startIcon={<LoginIcon />}
+                        startIcon={<SignUpIcon />}
                         sx={{
                             borderRadius: 4,
                             textTransform: "none",
@@ -109,14 +136,14 @@ export default function LoginPage() {
                             mb: 2,
                         }}
                     >
-                        Se connecter
+                        Créer un compte
                     </Button>
                 </form>
 
                 <Typography variant="body2" color="text.secondary">
-                    Pas encore de compte ?{" "}
-                    <Link href="/signup" underline="hover" color="primary">
-                        Crée-en un
+                    Déjà un compte ?{" "}
+                    <Link href="/pages/signin" underline="hover" color="primary">
+                        Connecte-toi
                     </Link>
                 </Typography>
             </Paper>

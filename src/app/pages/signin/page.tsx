@@ -1,8 +1,8 @@
-import Login from "@/components/login/login";
+import SignIn from "@/components/signin/signin";
 export default function Page() {
   return (
     <>
-      <Login/>
+      <SignIn/>
     </>
   );
 }
