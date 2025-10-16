@@ -12,24 +12,46 @@ import {
     IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff, PersonAdd as SignUpIcon } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+
 
 export default function SignUpPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
-    const [form, setForm] = useState({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-    });
+    const [form, setForm] = useState({ name: "", email: "", password: "" });
+    const [error, setError] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Add your signup logic here
-        console.log("Sign Up:", form);
+        setError("");
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.message || "Erreur lors de la création du compte");
+                return;
+            }
+
+            // Stocker token dans localStorage
+            localStorage.setItem("token", data.accessToken);
+
+            // Redirection après succès
+            router.push("/"); // ← ici tu peux mettre la page que tu veux
+        } catch (err) {
+            setError("Erreur réseau, réessaye plus tard");
+            console.error(err);
+        }
     };
 
     return (
@@ -109,17 +131,8 @@ export default function SignUpPage() {
                         }}
                     />
 
-                    <TextField
-                        label="Confirmer le mot de passe"
-                        variant="outlined"
-                        name="confirmPassword"
-                        type={showPassword ? "text" : "password"}
-                        value={form.confirmPassword}
-                        onChange={handleChange}
-                        fullWidth
-                        required
-                        sx={{ mb: 3 }}
-                    />
+
+                    {error && <Typography color="error" mb={2}>{error}</Typography>}
 
                     <Button
                         type="submit"
