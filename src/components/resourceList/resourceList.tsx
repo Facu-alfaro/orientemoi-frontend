@@ -1,6 +1,6 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import {
     Box,
     Card,
@@ -8,131 +8,178 @@ import {
     CardActions,
     Typography,
     Button,
-    IconButton, Fab, Tooltip,
+    IconButton,
+    Fab,
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent, TextField, DialogActions,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import axios from "axios";
 
-interface ResourceListProps {
-    type: string;
+interface ResourceType {
+    _id: string;
+    name: string;
+    description?: string;
 }
 
 interface Resource {
-    id: number;
+    _id: string;
     name: string;
-    description: string;
-    website: string;
+    description?: string;
+    website?: string;
+    typeId: string;
 }
 
-const initialResources: Resource[] = [
-    {
-        id: 1,
-        name: "Banque alimentaire locale",
-        description: "Repas gratuits et aide alimentaire disponible dans votre ville.",
-        website: "https://exemple.com",
-    },
-    {
-        id: 2,
-        name: "Aide alimentaire pour personne agée",
-        description: "Soutien alimentaire pour les personne de plus de 65 ans.",
-        website: "https://exemple2.com",
-    },
-];
+export default function ResourceList() {
+    const params = useParams();
+    const typeId = params.type; // récupère l'id du type depuis l'URL
+    const [openDialog, setOpenDialog] = useState(false);
+    const [newName, setNewName] = useState("");
+    const [newDescription, setNewDescription] = useState("");
+    const [newWebsite, setNewWebsite] = useState("");
 
-export default function ResourceList({ type }: ResourceListProps) {
-    const [resources, setResources] = useState(initialResources);
+    const [resources, setResources] = useState<Resource[]>([]);
+    const [typeInfo, setTypeInfo] = useState<ResourceType | null>(null);
 
-    const handleAddResource = () => {
-        const newId = resources.length + 1;
-        const newResource: Resource = {
-            id: newId,
-            name: `Nouvelle ressource ${newId}`,
-            description: "Description à compléter...",
-            website: "#",
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // 1️⃣ Récupérer le type de ressource par son id
+                const typeRes = await axios.get<ResourceType>(
+                    `http://localhost:4000/api/resource-types/${typeId}`
+                );
+                setTypeInfo(typeRes.data);
+
+                // 2️⃣ Récupérer les ressources associées
+                const res = await axios.get<Resource[]>(`http://localhost:4000/api/resources/${typeId}`);
+                setResources(res.data);
+            } catch (err) {
+                console.error("Erreur de chargement :", err);
+            }
         };
-        setResources([...resources, newResource]);
+        if (typeId) fetchData();
+    }, [typeId]);
+
+    // Open/Close the formulaire
+    const handleOpenDialog = () => setOpenDialog(true);
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setNewName("");
+        setNewDescription("");
     };
 
-    const handleEditResource = (id: number) => {
-        const newName = prompt("Modifier le nom de la ressource :");
+    const handleAddResource = async () => {
+        if (!newName.trim()) return alert("Le nom est requis !");
+        try {
+            const res = await axios.post<Resource>("http://localhost:4000/api/resources", {
+                name: newName,
+                description: newDescription,
+                website: newWebsite,
+                typeId,
+            });
+            setResources([...resources, res.data]);
+            handleCloseDialog();
+        } catch (err) {
+            console.error("Erreur lors de la création :", err);
+            alert("Erreur lors de la création de la ressource");
+        }
+    };
+
+    const handleEditResource = (id: string) => {
+        const newName = prompt("Modifier le nom :");
         if (newName) {
-            setResources(
-                resources.map((r) => (r.id === id ? { ...r, name: newName } : r))
-            );
+            setResources(resources.map(r => r._id === id ? { ...r, name: newName } : r));
         }
     };
 
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "#f5f5f5", p: 4, position: "relative" }}>
-            <Typography variant="h4" fontWeight="bold" mb={4} color="text.primary" >
-                Ressources pour {type}
-            </Typography>
+            {/* Show the name title of the type */}
+            {typeInfo && (
+                <Box sx={{ mb: 4 }}>
+                    <Typography variant="h4" fontWeight="bold" color="black">Resource pour {typeInfo.name}</Typography>
 
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "1fr 1fr",
-                        md: "1fr 1fr 1fr",
-                    },
-                    gap: 3,
-                }}
-            >
-                {resources.map((resource) => (
-                    <Card
-                        key={resource.id}
-                        sx={{ position: "relative", borderRadius: 3, boxShadow: 3 }}
-                    >
-                        <IconButton
-                            onClick={() => handleEditResource(resource.id)}
-                            sx={{ position: "absolute", top: 8, right: 8 }}
-                            title="Modifier la ressource"
-                        >
+                </Box>
+            )}
+
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 3 }}>
+                {resources.map(resource => (
+                    <Card key={resource._id} sx={{ borderRadius: 3, boxShadow: 3, position: "relative" }}>
+                        <IconButton onClick={() => handleEditResource(resource._id)} sx={{ position: "absolute", top: 8, right: 8 }}>
                             <EditIcon />
                         </IconButton>
 
                         <CardContent>
-                            <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                {resource.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {resource.description}
-                            </Typography>
+                            <Typography variant="h6" fontWeight="bold" gutterBottom>{resource.name}</Typography>
+                            {resource.description && (
+                                <Typography variant="body2" color="text.secondary">{resource.description}</Typography>
+                            )}
                         </CardContent>
 
-                        <CardActions>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                color="primary"
-                                href={resource.website}
-                                target="_blank"
-                                fullWidth
-                            >
-                                Visiter le site
-                            </Button>
-                        </CardActions>
+                        {resource.website && (
+                            <CardActions>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="primary"
+                                    href={resource.website}
+                                    target="_blank"
+                                    fullWidth
+                                >
+                                    Visiter le site
+                                </Button>
+                            </CardActions>
+                        )}
                     </Card>
                 ))}
             </Box>
 
-            <Tooltip title="Ajouter un nouveau type de ressource" arrow>
-                <Fab
-                    color="primary"
-                    aria-label="add"
-                    onClick={handleAddResource}
-                    sx={{
-                        position: "fixed",
-                        bottom: 24,
-                        right: 24,
-                        boxShadow: 4,
-                        "&:hover": { boxShadow: 6 },
-                    }}
-                >
+            {/* Button + */}
+            <Tooltip title="Ajouter un nouveau type" arrow>
+                <Fab color="primary" aria-label="add" onClick={handleOpenDialog} sx={{ position: "fixed", bottom: 24, right: 24 }}>
                     <AddIcon fontSize="large" />
                 </Fab>
             </Tooltip>
+
+            {/* Dialog Formulaire */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Ajouter un type de ressource</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Nom"
+                        fullWidth
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Description"
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        value={newDescription}
+                        onChange={(e) => setNewDescription(e.target.value)}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Website"
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        value={newWebsite}
+                        onChange={(e) => setNewWebsite(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog}>Annuler</Button>
+                    <Button onClick={handleAddResource} variant="contained">Ajouter</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

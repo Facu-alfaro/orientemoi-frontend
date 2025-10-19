@@ -62,7 +62,7 @@ export default function ResourceTypeList() {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 4 }}>
-            <Typography variant="h3" fontWeight="bold" sx={{ mb: 6, textAlign: "center" }}>
+            <Typography variant="h3" fontWeight="bold" color="black" sx={{ mb: 6, textAlign: "center" }}>
                 Types de Ressources
             </Typography>
 
@@ -99,7 +99,7 @@ export default function ResourceTypeList() {
                                         fullWidth
                                         sx={{ fontWeight: 600, bgcolor: color, "&:hover": { bgcolor: color } }}
                                         onClick={() =>
-                                            router.push(`/pages/resourceList/${(type.name || "type").toLowerCase()}`)
+                                            router.push(`/pages/resourceList/${type._id}`)
                                         }
                                     >
                                         Voir les ressources
