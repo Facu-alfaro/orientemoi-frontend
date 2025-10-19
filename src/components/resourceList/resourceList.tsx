@@ -31,6 +31,7 @@ interface Resource {
     description?: string;
     website?: string;
     typeId: string;
+    city?: string;
 }
 
 export default function ResourceList() {
@@ -48,13 +49,13 @@ export default function ResourceList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1️⃣ Récupérer le type de ressource par son id
+                // Récupérer le type de ressource par son id
                 const typeRes = await axios.get<ResourceType>(
                     `http://localhost:4000/api/resource-types/${typeId}`
                 );
                 setTypeInfo(typeRes.data);
 
-                // 2️⃣ Récupérer les ressources associées
+                // Récupérer les ressources associées
                 const res = await axios.get<Resource[]>(`http://localhost:4000/api/resources/${typeId}`);
                 setResources(res.data);
             } catch (err) {
@@ -70,6 +71,8 @@ export default function ResourceList() {
         setOpenDialog(false);
         setNewName("");
         setNewDescription("");
+        setNewWebsite("");
+        setNewCity("");
     };
 
     const handleAddResource = async () => {
@@ -184,7 +187,7 @@ export default function ResourceList() {
                         minRows={2}
                         value={newCity}
                         onChange={(e) => setNewCity(e.target.value)}
-                        />
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Annuler</Button>
