@@ -40,6 +40,7 @@ export default function ResourceList() {
     const [newName, setNewName] = useState("");
     const [newDescription, setNewDescription] = useState("");
     const [newWebsite, setNewWebsite] = useState("");
+    const [newCity, setNewCity] = useState("");
 
     const [resources, setResources] = useState<Resource[]>([]);
     const [typeInfo, setTypeInfo] = useState<ResourceType | null>(null);
@@ -78,6 +79,7 @@ export default function ResourceList() {
                 name: newName,
                 description: newDescription,
                 website: newWebsite,
+                city: newCity,
                 typeId,
             });
             setResources([...resources, res.data]);
@@ -174,6 +176,15 @@ export default function ResourceList() {
                         value={newWebsite}
                         onChange={(e) => setNewWebsite(e.target.value)}
                     />
+                    <TextField
+                        margin="dense"
+                        label="City"
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        value={newCity}
+                        onChange={(e) => setNewCity(e.target.value)}
+                        />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Annuler</Button>
