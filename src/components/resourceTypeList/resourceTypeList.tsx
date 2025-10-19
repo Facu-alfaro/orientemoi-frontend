@@ -1,51 +1,68 @@
-"use client";
-import React, { useState } from "react";
+interface ResourceType {
+    _id: string;
+    name: string;
+    description?: string; // optionnel
+}
+
+
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Grid, Typography, Button, Tooltip, Fab, Card, CardContent, CardActions } from "@mui/material";
+import axios from "axios";
+import {
+    Box, Grid, Typography, Button, Tooltip, Fab, Card, CardContent, CardActions,
+    Dialog, DialogTitle, DialogContent, DialogActions, TextField
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-const initialResourceTypes = [
-    {
-        id: 1,
-        name: "Aide alimentaire",
-        description: "Liste des banques alimentaires, programmes d'aide et repas gratuits disponibles dans votre ville.",
-    },
-    {
-        id: 2,
-        name: "Anxiété",
-        description: "Ressources pour le soutien psychologique, groupes de discussion et lignes d'écoute.",
-    },
-    {
-        id: 3,
-        name: "Logement",
-        description: "Aide pour trouver un logement temporaire, services sociaux et centres d'hébergement.",
-    },
-];
-
-// Tableau de couleurs pour les bordures et boutons
 const borderColors = ["#1976d2", "#388e3c", "#f57c00", "#7b1fa2", "#c2185b"];
 
 export default function ResourceTypeList() {
-    const [resourceTypes, setResourceTypes] = useState(initialResourceTypes);
+    const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [newName, setNewName] = useState("");
+    const [newDescription, setNewDescription] = useState("");
     const router = useRouter();
 
-    const handleAddResourceType = () => {
-        const newId = resourceTypes.length + 1;
-        const newType = {
-            id: newId,
-            name: `Nouveau type ${newId}`,
-            description: "Description à compléter...",
+    // Load from backend
+    useEffect(() => {
+        const fetchResourceTypes = async () => {
+            try {
+                const res = await axios.get("http://localhost:4000/api/resource-types");
+                setResourceTypes(res.data || []);
+            } catch (error) {
+                console.error("Erreur de chargement:", error);
+            }
         };
-        setResourceTypes([...resourceTypes, newType]);
+        fetchResourceTypes();
+    }, []);
+
+    // Open/Close the formulaire
+    const handleOpenDialog = () => setOpenDialog(true);
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setNewName("");
+        setNewDescription("");
+    };
+
+    // Add a new resource via backend
+    const handleAddResourceType = async () => {
+        if (!newName.trim()) return alert("Le nom est requis !");
+        try {
+            const res = await axios.post("http://localhost:4000/api/resource-types", {
+                name: newName,
+                description: newDescription,
+            });
+            setResourceTypes([...resourceTypes, res.data]); // Ajoute la nouvelle ressource à la liste
+            handleCloseDialog();
+        } catch (error) {
+            console.error("Erreur lors de la création:", error);
+            alert("Erreur lors de la création de la ressource");
+        }
     };
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 4 }}>
-            <Typography
-                variant="h3"
-                fontWeight="bold"
-                sx={{ mb: 6, color: "text.primary", textAlign: "center" }}
-            >
+            <Typography variant="h3" fontWeight="bold" sx={{ mb: 6, textAlign: "center" }}>
                 Types de Ressources
             </Typography>
 
@@ -53,7 +70,7 @@ export default function ResourceTypeList() {
                 {resourceTypes.map((type, index) => {
                     const color = borderColors[index % borderColors.length];
                     return (
-                        <Grid item key={type.id} xs={12} sm={6} md={4}>
+                        <Grid item key={type._id || type._id || index} xs={12} sm={6} md={4}>
                             <Card
                                 sx={{
                                     height: "100%",
@@ -64,18 +81,15 @@ export default function ResourceTypeList() {
                                     border: `2px solid ${color}`,
                                     boxShadow: 3,
                                     transition: "all 0.3s ease",
-                                    "&:hover": {
-                                        boxShadow: 6,
-                                        transform: "translateY(-3px)",
-                                    },
+                                    "&:hover": { boxShadow: 6, transform: "translateY(-3px)" },
                                 }}
                             >
                                 <CardContent>
                                     <Typography variant="h5" fontWeight="bold" gutterBottom>
-                                        {type.name}
+                                        {type.name || "Nom inconnu"}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        {type.description}
+                                        {type.description || "Aucune description"}
                                     </Typography>
                                 </CardContent>
 
@@ -83,12 +97,10 @@ export default function ResourceTypeList() {
                                     <Button
                                         variant="contained"
                                         fullWidth
-                                        sx={{
-                                            fontWeight: 600,
-                                            bgcolor: color,
-                                            "&:hover": { bgcolor: color },
-                                        }}
-                                        onClick={() => router.push(`/pages/resourceList/${type.name.toLowerCase()}`)}
+                                        sx={{ fontWeight: 600, bgcolor: color, "&:hover": { bgcolor: color } }}
+                                        onClick={() =>
+                                            router.push(`/pages/resourceList/${(type.name || "type").toLowerCase()}`)
+                                        }
                                     >
                                         Voir les ressources
                                     </Button>
@@ -99,22 +111,40 @@ export default function ResourceTypeList() {
                 })}
             </Grid>
 
-            <Tooltip title="Ajouter une nouvelle ressource" arrow>
-                <Fab
-                    color="primary"
-                    aria-label="add"
-                    onClick={handleAddResourceType}
-                    sx={{
-                        position: "fixed",
-                        bottom: 24,
-                        right: 24,
-                        boxShadow: 4,
-                        "&:hover": { boxShadow: 6 },
-                    }}
-                >
+            {/* Button + */}
+            <Tooltip title="Ajouter un nouveau type" arrow>
+                <Fab color="primary" aria-label="add" onClick={handleOpenDialog} sx={{ position: "fixed", bottom: 24, right: 24 }}>
                     <AddIcon fontSize="large" />
                 </Fab>
             </Tooltip>
+
+            {/* Dialog Formulaire */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Ajouter un type de ressource</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Nom"
+                        fullWidth
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Description"
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        value={newDescription}
+                        onChange={(e) => setNewDescription(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog}>Annuler</Button>
+                    <Button onClick={handleAddResourceType} variant="contained">Ajouter</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
