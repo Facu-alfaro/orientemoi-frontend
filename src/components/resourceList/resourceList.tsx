@@ -49,14 +49,11 @@ export default function ResourceList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Récupérer le type de ressource par son id
-                const typeRes = await axios.get<ResourceType>(
-                    `http://localhost:4000/api/resource-types/${typeId}`
-                );
+                const [typeRes, res] = await Promise.all([
+                    axios.get<ResourceType>(`http://localhost:4000/api/resource-types/${typeId}`),
+                    axios.get<Resource[]>(`http://localhost:4000/api/resources/${typeId}`)
+                ]);
                 setTypeInfo(typeRes.data);
-
-                // Récupérer les ressources associées
-                const res = await axios.get<Resource[]>(`http://localhost:4000/api/resources/${typeId}`);
                 setResources(res.data);
             } catch (err) {
                 console.error("Erreur de chargement :", err);
@@ -64,6 +61,7 @@ export default function ResourceList() {
         };
         if (typeId) fetchData();
     }, [typeId]);
+
 
     // Open/Close the formulaire
     const handleOpenDialog = () => setOpenDialog(true);

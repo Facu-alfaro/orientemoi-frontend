@@ -45,11 +45,12 @@ export default function RapportPreview() {
         <Box sx={{ p: 4, bgcolor: "#fafafa", minHeight: "100vh" }}>
             <Paper
                 ref={previewRef}
+                className="print-area"
                 sx={{
-                    width: 800,       // largeur fixe pour le PDF
+                    width: 800,
                     maxWidth: "100%",
-                    mx: "auto",       // centre horizontal
-                    p: 6,             // padding interne
+                    mx: "auto",
+                    p: 6,
                     borderRadius: 4,
                     backgroundColor: "#fff",
                     boxShadow: 3,
@@ -57,7 +58,8 @@ export default function RapportPreview() {
                     flexDirection: "column",
                 }}
             >
-                <Box sx={{ textAlign: "center", mb: 4 }}>
+
+            <Box sx={{ textAlign: "center", mb: 4 }}>
                     <Typography variant="h4" fontWeight="bold">
                         Rapport de Ressources
                     </Typography>
@@ -80,8 +82,9 @@ export default function RapportPreview() {
                                     {res.name}
                                 </Typography>
                                 <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                                    Type : {res.type} <br />
-                                    Ville : {res.ville}
+                                    Type : {typeof res.typeId === "string" ? "Inconnu" : res.typeId.name} <br />
+                                    Website : {res.website} <br />
+                                    Ville : {res.city}
                                 </Typography>
                             </Paper>
                         </Grid>
@@ -109,6 +112,38 @@ export default function RapportPreview() {
                     Imprimer
                 </Button>
             </Box>
+            {/* ✅ Styles pour l’impression */}
+            <style jsx global>{`
+                @media print {
+                    body {
+                        background: white !important;
+                        -webkit-print-color-adjust: exact !important;
+                    }
+
+                    /* Masquer les boutons et autres éléments non essentiels */
+                    button,
+                    .MuiButton-root,
+                    [role="button"],
+                    #__next > div > :not(.print-area) {
+                        display: none !important;
+                    }
+
+                    /* Ne garder que la zone du rapport */
+                    .print-area {
+                        display: block !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    /* Supprimer les marges de la page imprimée */
+                    @page {
+                        margin: 0;
+                    }
+                }
+            `}</style>
         </Box>
     );
 }

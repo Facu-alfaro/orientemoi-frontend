@@ -6,6 +6,7 @@ import {
     ListItemText, OutlinedInput, Button, Grid, Card, CardContent, FormControlLabel
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import axios from "axios";
 
 interface ResourceType {
@@ -51,11 +52,17 @@ export default function RapportForm() {
     }, []);
 
     // filtrage dynamique
-    const filteredResources = resources.filter(
-        (res) =>
-            (selectedTypes.length === 0 || selectedTypes.includes(typeof res.typeId === 'string' ? res.typeId : res.typeId._id)) &&
-            (selectedCities.length === 0 || (res.city && selectedCities.includes(res.city)))
-    );
+    const filteredResources = useMemo(() => {
+        return resources.filter(
+            (res) =>
+                (selectedTypes.length === 0 ||
+                    selectedTypes.includes(
+                        typeof res.typeId === "string" ? res.typeId : res.typeId._id
+                    )) &&
+                (selectedCities.length === 0 ||
+                    (res.city && selectedCities.includes(res.city)))
+        );
+    }, [resources, selectedTypes, selectedCities]);
 
     const toggleResourceSelection = (id: string) => {
         setSelectedResources((prev) =>
@@ -139,26 +146,34 @@ export default function RapportForm() {
                     </Button>
                 </Box>
 
-                <Grid container spacing={3}>
+                {/* Liste verticale des ressources */}
+                <Grid container direction="column" spacing={2}>
                     {filteredResources.map((res) => (
-                        <Grid item xs={12} sm={6} md={4} key={res._id}>
+                        <Grid item key={res._id}>
                             <Card sx={{ borderRadius: 3, boxShadow: 3, p: 2 }}>
-                                <CardContent>
-                                    <Typography variant="h6" fontWeight="bold">
-                                        {res.name}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Type: {typeof res.typeId === 'string' ? "Inconnu" : res.typeId.name} <br />
-                                        City: {res.city}
-                                    </Typography>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={selectedResources.includes(res._id)}
-                                                onChange={() => toggleResourceSelection(res._id)}
-                                            />
-                                        }
-                                        label="Sélectionner"
+                                <CardContent
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <Box>
+                                        <Typography variant="h6" fontWeight="bold">
+                                            {res.name}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Description: {res.description} <br/>
+                                            Type: {typeof res.typeId === "string" ? "Inconnu" : res.typeId.name} <br/>
+                                            Website: {res.website}<br/>
+                                            Ville: {res.city}
+                                        </Typography>
+                                    </Box>
+
+                                    {/* Checkbox complètement à droite */}
+                                    <Checkbox
+                                        checked={selectedResources.includes(res._id)}
+                                        onChange={() => toggleResourceSelection(res._id)}
                                     />
                                 </CardContent>
                             </Card>
