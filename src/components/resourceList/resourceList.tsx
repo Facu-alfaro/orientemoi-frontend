@@ -34,9 +34,13 @@ interface Resource {
     city?: string;
 }
 
-export default function ResourceList() {
+interface ResourceListProps {
+    type?: string;
+}
+
+export default function ResourceList({ type }: ResourceListProps) {
     const params = useParams();
-    const typeId = params.type; // récupère l'id du type depuis l'URL
+    const typeId = type || params.type; // récupère l'id du type depuis l'URL
     const [openDialog, setOpenDialog] = useState(false);
     const [newName, setNewName] = useState("");
     const [newDescription, setNewDescription] = useState("");
