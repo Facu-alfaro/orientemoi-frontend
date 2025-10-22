@@ -6,9 +6,17 @@ import { Box, Typography, Paper, Button, Grid, Divider } from "@mui/material";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
+interface Resource {
+    name: string;
+    typeId: { name: string } | string;
+    website: string;
+    city: string;
+}
+
+
 export default function RapportPreview() {
     const searchParams = useSearchParams();
-    const [resources, setResources] = useState<any[]>([]);
+    const [resources, setResources] = useState<Resource[]>([]);
     const previewRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

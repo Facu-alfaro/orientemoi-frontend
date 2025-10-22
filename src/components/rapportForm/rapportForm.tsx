@@ -164,7 +164,7 @@ export default function RapportForm() {
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
                                             Description: {res.description} <br/>
-                                            Type: {typeof res.typeId === "string" ? "Inconnu" : res.typeId.name} <br/>
+                                            Type: {typeof res.typeId === "object" ? res.typeId?.name ?? "Inconnu" : "Inconnu"} <br/>
                                             Website: {res.website}<br/>
                                             Ville: {res.city}
                                         </Typography>
