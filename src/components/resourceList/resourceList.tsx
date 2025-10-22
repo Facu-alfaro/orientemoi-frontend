@@ -46,12 +46,15 @@ export default function ResourceList() {
     const [resources, setResources] = useState<Resource[]>([]);
     const [typeInfo, setTypeInfo] = useState<ResourceType | null>(null);
 
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [typeRes, res] = await Promise.all([
-                    axios.get<ResourceType>(`http://localhost:4000/api/resource-types/${typeId}`),
-                    axios.get<Resource[]>(`http://localhost:4000/api/resources/${typeId}`)
+                    axios.get<ResourceType>(`${API_BASE}/api/resource-types/${typeId}`),
+                    axios.get<Resource[]>(`${API_BASE}/api/resources/${typeId}`)
                 ]);
                 setTypeInfo(typeRes.data);
                 setResources(res.data);
@@ -76,7 +79,7 @@ export default function ResourceList() {
     const handleAddResource = async () => {
         if (!newName.trim()) return alert("Le nom est requis !");
         try {
-            const res = await axios.post<Resource>("http://localhost:4000/api/resources", {
+            const res = await axios.post<Resource>(`${API_BASE}/api/resources`, {
                 name: newName,
                 description: newDescription,
                 website: newWebsite,

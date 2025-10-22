@@ -25,6 +25,7 @@ export default function SignInPage() {
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log("API URL utilisée :", process.env.NEXT_PUBLIC_API_URL);
         e.preventDefault();
         setError("");
 

@@ -23,11 +23,14 @@ export default function ResourceTypeList() {
     const [newDescription, setNewDescription] = useState("");
     const router = useRouter();
 
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+
     // Load from backend
     useEffect(() => {
         const fetchResourceTypes = async () => {
             try {
-                const res = await axios.get("http://localhost:4000/api/resource-types");
+                const res = await axios.get(`${API_BASE}/api/resource-types`);
                 setResourceTypes(res.data || []);
             } catch (error) {
                 console.error("Erreur de chargement:", error);
@@ -48,7 +51,7 @@ export default function ResourceTypeList() {
     const handleAddResourceType = async () => {
         if (!newName.trim()) return alert("Le nom est requis !");
         try {
-            const res = await axios.post("http://localhost:4000/api/resource-types", {
+            const res = await axios.post(`${API_BASE}/api/resource-types`, {
                 name: newName,
                 description: newDescription,
             });

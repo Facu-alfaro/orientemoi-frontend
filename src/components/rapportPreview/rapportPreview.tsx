@@ -90,7 +90,7 @@ export default function RapportPreview() {
                                     {res.name}
                                 </Typography>
                                 <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                                    Type : {typeof res.typeId === "string" ? "Inconnu" : res.typeId.name} <br />
+                                    Type : {typeof res.typeId === "string" ? "Inconnu" : res.typeId?.name || "Inconnu"} <br />
                                     Website : {res.website} <br />
                                     Ville : {res.city}
                                 </Typography>

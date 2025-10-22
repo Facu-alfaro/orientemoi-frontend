@@ -32,14 +32,17 @@ export default function RapportForm() {
     const [selectedResources, setSelectedResources] = useState<string[]>([]);
     const [cities, setCities] = useState<string[]>([]);
 
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+
     // fetch types et ressources
     useEffect(() => {
         const fetchResourcesAndTypes = async () => {
             try {
-                const typesRes = await axios.get<ResourceType[]>('http://localhost:4000/api/resource-types');
+                const typesRes = await axios.get<ResourceType[]>(`${API_BASE}/api/resource-types`);
                 setResourceTypes(typesRes.data);
 
-                const res = await axios.get<Resource[]>('http://localhost:4000/api/resources');
+                const res = await axios.get<Resource[]>(`${API_BASE}/api/resources`);
                 setResources(res.data);
 
                 const allCities = Array.from(new Set(res.data.map(r => r.city).filter(Boolean)));
