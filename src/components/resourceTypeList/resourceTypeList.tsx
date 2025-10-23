@@ -1,10 +1,4 @@
 "use client";
-interface ResourceType {
-        _id: string;
-        name: string;
-        description?: string;
-}
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -22,10 +16,16 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
+    TextField, CircularProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FolderOffIcon from "@mui/icons-material/FolderOff";
+
+interface ResourceType {
+    _id: string;
+    name: string;
+    description?: string;
+}
 
 const borderColors = ["#1976d2", "#388e3c", "#f57c00", "#7b1fa2", "#c2185b"];
 
@@ -35,6 +35,7 @@ export default function ResourceTypeList() {
     const [newName, setNewName] = useState("");
     const [newDescription, setNewDescription] = useState("");
     const router = useRouter();
+    const [loading, setLoading] = useState(true); // ✅ ajout du loader
 
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -45,6 +46,8 @@ export default function ResourceTypeList() {
                 setResourceTypes(res.data || []);
             } catch (error) {
                 console.error("Erreur de chargement:", error);
+            }finally {
+                setLoading(false); // ✅ stop le loader
             }
         };
         fetchResourceTypes();
@@ -71,6 +74,24 @@ export default function ResourceTypeList() {
             alert("Erreur lors de la création de la ressource");
         }
     };
+
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    height: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "gray",
+                    flexDirection: "column",
+                }}
+            >
+                <CircularProgress color="primary" sx={{ mb: 2 }} />
+                <Typography variant="body1">Chargement des ressources...</Typography>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 4 }}>
