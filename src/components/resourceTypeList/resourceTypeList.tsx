@@ -1,4 +1,7 @@
 "use client";
+
+console.log("API_BASE =", process.env.NEXT_PUBLIC_API_URL);
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -16,10 +19,14 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField, CircularProgress,
+    TextField,
+    CircularProgress,
+    IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FolderOffIcon from "@mui/icons-material/FolderOff";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface ResourceType {
     _id: string;
@@ -34,8 +41,10 @@ export default function ResourceTypeList() {
     const [openDialog, setOpenDialog] = useState(false);
     const [newName, setNewName] = useState("");
     const [newDescription, setNewDescription] = useState("");
+    const [editMode, setEditMode] = useState(false);
+    const [currentId, setCurrentId] = useState<string | null>(null);
     const router = useRouter();
-    const [loading, setLoading] = useState(true); // ✅ ajout du loader
+    const [loading, setLoading] = useState(true);
 
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -46,32 +55,70 @@ export default function ResourceTypeList() {
                 setResourceTypes(res.data || []);
             } catch (error) {
                 console.error("Erreur de chargement:", error);
-            }finally {
-                setLoading(false); // ✅ stop le loader
+            } finally {
+                setLoading(false);
             }
         };
         fetchResourceTypes();
     }, []);
 
-    const handleOpenDialog = () => setOpenDialog(true);
+    // 👉 ouvrir la boîte de dialogue (ajout ou édition)
+    const handleOpenDialog = (type?: ResourceType) => {
+        if (type) {
+            setEditMode(true);
+            setCurrentId(type._id);
+            setNewName(type.name);
+            setNewDescription(type.description || "");
+        } else {
+            setEditMode(false);
+            setCurrentId(null);
+            setNewName("");
+            setNewDescription("");
+        }
+        setOpenDialog(true);
+    };
+
     const handleCloseDialog = () => {
         setOpenDialog(false);
+        setEditMode(false);
         setNewName("");
         setNewDescription("");
     };
 
-    const handleAddResourceType = async () => {
+    // Add or modify
+    const handleSaveResourceType = async () => {
         if (!newName.trim()) return alert("Le nom est requis !");
         try {
-            const res = await axios.post(`${API_BASE}/api/resource-types`, {
-                name: newName,
-                description: newDescription,
-            });
-            setResourceTypes([...resourceTypes, res.data]);
+            if (editMode && currentId) {
+                const res = await axios.put(`${API_BASE}/api/resource-types/${currentId}`, {
+                    name: newName,
+                    description: newDescription,
+                });
+                setResourceTypes(resourceTypes.map(t => (t._id === currentId ? res.data : t)));
+            } else {
+                const res = await axios.post(`${API_BASE}/api/resource-types`, {
+                    name: newName,
+                    description: newDescription,
+                });
+                setResourceTypes([...resourceTypes, res.data]);
+            }
             handleCloseDialog();
         } catch (error) {
-            console.error("Erreur lors de la création:", error);
-            alert("Erreur lors de la création de la ressource");
+            console.error("Erreur lors de la sauvegarde:", error);
+            alert("Erreur lors de la sauvegarde du type de ressource");
+        }
+    };
+
+    // Delete
+    const handleDelete = async (id: string) => {
+          console.log("Suppression de l’ID:", id);
+        if (!confirm("Voulez-vous vraiment supprimer ce type ?")) return;
+        try {
+            await axios.delete(`${API_BASE}/api/resource-types/${id}`);
+            setResourceTypes(resourceTypes.filter(t => t._id !== id));
+        } catch (error) {
+            console.error("Erreur lors de la suppression:", error);
+            alert("Erreur lors de la suppression du type de ressource");
         }
     };
 
@@ -100,7 +147,6 @@ export default function ResourceTypeList() {
             </Typography>
 
             {resourceTypes.length === 0 ? (
-                // ✅ État vide visible
                 <Box
                     sx={{
                         textAlign: "center",
@@ -140,13 +186,23 @@ export default function ResourceTypeList() {
                                         "&:hover": { boxShadow: 6, transform: "translateY(-3px)" },
                                     }}
                                 >
-                                    <CardContent>
+                                    <CardContent sx={{ position: "relative" }}>
                                         <Typography variant="h5" fontWeight="bold" gutterBottom>
                                             {type.name || "Nom inconnu"}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
                                             {type.description || "Aucune description"}
                                         </Typography>
+
+                                        {/* 🖊️ & 🗑️ icônes dans le coin */}
+                                        <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+                                            <IconButton color="primary" size="small" onClick={() => handleOpenDialog(type)}>
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton color="error" size="small" onClick={() => handleDelete(type._id)}>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
                                     </CardContent>
 
                                     <CardActions>
@@ -170,16 +226,21 @@ export default function ResourceTypeList() {
                 </Grid>
             )}
 
-            {/* Bouton + */}
+            {/* ➕ Bouton d'ajout */}
             <Tooltip title="Ajouter un nouveau type" arrow>
-                <Fab color="primary" aria-label="add" onClick={handleOpenDialog} sx={{ position: "fixed", bottom: 24, right: 24 }}>
+                <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={() => handleOpenDialog()}
+                    sx={{ position: "fixed", bottom: 24, right: 24 }}
+                >
                     <AddIcon fontSize="large" />
                 </Fab>
             </Tooltip>
 
-            {/* Dialog */}
+            {/* 🪟 Dialog (ajout / modification) */}
             <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>Ajouter un type de ressource</DialogTitle>
+                <DialogTitle>{editMode ? "Modifier le type" : "Ajouter un type de ressource"}</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -201,8 +262,8 @@ export default function ResourceTypeList() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Annuler</Button>
-                    <Button onClick={handleAddResourceType} variant="contained">
-                        Ajouter
+                    <Button onClick={handleSaveResourceType} variant="contained">
+                        {editMode ? "Enregistrer" : "Ajouter"}
                     </Button>
                 </DialogActions>
             </Dialog>
