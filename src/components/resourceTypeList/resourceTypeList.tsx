@@ -62,7 +62,7 @@ export default function ResourceTypeList() {
         fetchResourceTypes();
     }, []);
 
-    // 👉 ouvrir la boîte de dialogue (ajout ou édition)
+    // Open dialog box (add or edit)
     const handleOpenDialog = (type?: ResourceType) => {
         if (type) {
             setEditMode(true);
@@ -226,7 +226,7 @@ export default function ResourceTypeList() {
                 </Grid>
             )}
 
-            {/* ➕ Bouton d'ajout */}
+            {/* Add Button */}
             <Tooltip title="Ajouter un nouveau type" arrow>
                 <Fab
                     color="primary"
@@ -238,7 +238,7 @@ export default function ResourceTypeList() {
                 </Fab>
             </Tooltip>
 
-            {/* 🪟 Dialog (ajout / modification) */}
+            {/* Dialog (add / modify) */}
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{editMode ? "Modifier le type" : "Ajouter un type de ressource"}</DialogTitle>
                 <DialogContent>
